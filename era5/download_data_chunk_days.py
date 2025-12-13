@@ -238,7 +238,7 @@ if __name__ == "__main__":
 
     # 2. 实例化下载器类 (在这里修改主要参数)
     downloader = ERA5Downloader(
-        output_dir="./era5_daily_data_global_5*5",  # 保存路径
+        output_dir="/mnt/drive1/pengpeng/storage/era5/era5_daily_data_global_5*5",  # 保存路径
         variables=ERA5_VARIABLES,               # 变量列表
         area_grid=[5, 5],                       # 分辨率
         # area=[54, 73, 3, 135],

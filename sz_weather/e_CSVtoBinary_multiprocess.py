@@ -14,15 +14,20 @@ class CSVToBinConverter:
         
         # 1. 原始列 (CSV中读取)
         self.keep_columns = [
-            'DDATETIME', 'GRIDID', 'LON_CENTER', 'LAT_CENTER',
-            'T', 'MAXTOFDAY',
-            'SLP',
-            'RHSFC', 'V',
-            'RAIN01H', 'RAIN02H', 'RAIN03H', 'RAIN06H', 'RAIN24H',
-            'WSPD_X', 'WSPD_Y', 'WD3SMAXDF_X', 'WD3SMAXDF_Y',
-            'AIR_DENSITY'
+            'DDATETIME',
+            'GRIDID',
+            'LON_CENTER', 'LAT_CENTER', # 经纬度
+            'T',  # 温度，摄氏度
+            'MAXTOFDAY', # 日最高温度，摄氏度
+            'SLP', # 气压，百帕
+            'RHSFC', # 相对湿度 [0, 100]
+            'V', # 能见度 公里
+            'RAIN01H', 'RAIN02H', 'RAIN03H', 'RAIN06H', 'RAIN24H', # 1小时到24小时累计降水量，毫米
+            'WSPD_X', 'WSPD_Y',  # 风速分量，米/秒
+            'WD3SMAXDF_X', 'WD3SMAXDF_Y',  # 极大风速 米/秒， 极大风向 度
+            'AIR_DENSITY' # 空气密度
         ]
-        
+
         # 2. 最终输出特征顺序
         self.weather_columns = [
             'T', 'MAXTOFDAY', 'SLP', 'AIR_DENSITY',
@@ -43,18 +48,14 @@ class CSVToBinConverter:
         
     def calculate_derived_features(self, df):
         """计算衍生变量 和 单位换算"""
-        # 1. 气压: hPa -> Bar
+        # 气压: hPa -> kPa
         if 'SLP' in df.columns:
-            df['SLP'] = df['SLP'] / 1000.0
+            df['SLP'] = df['SLP'] / 10.0
             
-        # 2. 湿度: % -> 0-1
-        if 'RHSFC' in df.columns:
-            df['RHSFC'] = (df['RHSFC'] / 100.0).clip(0, 1)
-
-        # 3. 平均风速合成
+        # 平均风速合成
         df['WSPD'] = np.sqrt(df['WSPD_X']**2 + df['WSPD_Y']**2)
         
-        # 4. 极大风速合成
+        # 极大风速合成
         df['GUST'] = np.sqrt(df['WD3SMAXDF_X']**2 + df['WD3SMAXDF_Y']**2)
         
         return df
@@ -223,9 +224,9 @@ class CSVToBinConverter:
 
 if __name__ == "__main__":
     # 路径配置
-    data_dir = '/mnt/drive1/pengpeng/storage/sz_weather/filled_data'
+    data_dir = '/mnt/drive1/pengpeng/storage/sz_weather/csv_data'
     test_dir = '/mnt/drive1/pengpeng/storage/sz_weather/bin_data'
     
     # 可以在这里手动指定进程数，例如 max_workers=8
     converter = CSVToBinConverter(data_dir, test_dir)
-    converter.process_all_files(max_workers=16)
+    converter.process_all_files(max_workers=32)

@@ -41,7 +41,7 @@ class CSVToBinConverter:
             es = 6.112 * np.exp((17.67 * t_c) / (t_c + 243.5))
             e = 6.112 * np.exp((17.67 * td_c) / (td_c + 243.5))
             
-            df['rh'] = (e / es).clip(0, 1)
+            df['rh'] = (e / es).clip(0, 1) * 100
 
         # --- WS 计算 ---
         if 'u10' in df.columns and 'v10' in df.columns:
@@ -57,14 +57,14 @@ class CSVToBinConverter:
             if col in df.columns:
                 df[col] = df[col] - 273.15
 
-        # 气压: Pa -> Bar (100 kPa)
+        # 气压: Pa -> kPa
         for col in ['sp', 'msl']:
             if col in df.columns:
-                df[col] = df[col] / 100000.0
+                df[col] = df[col] / 1000.0
 
         # 高度: m / m2s2 -> km
         if 'z' in df.columns:
-            df['z'] = df['z'] / 9806.65 # Geopotential -> Height (km)
+            df['z'] = df['z'] / 9806.65 # Geopotential -> Height (m)
         
         if 'blh' in df.columns:
             df['blh'] = df['blh'] / 1000.0 # m -> km
@@ -247,12 +247,12 @@ class CSVToBinConverter:
 if __name__ == "__main__":
     
     # 1. 路径设置
-    INPUT_DIR = '/mnt/drive1/pengpeng/storage/era5/era5_daily_data_global_5*5'
-    OUTPUT_DIR = '/mnt/drive1/pengpeng/storage/era5/era5_bin_data_global_5*5'
+    INPUT_DIR = '/mnt/drive1/pengpeng/storage/era5/csv_data_cn'
+    OUTPUT_DIR = '/mnt/drive1/pengpeng/storage/era5/bin_data_cn'
     
     # 2. 区域与分辨率配置
-    AREA = None               # 全球模式示例 (或 [90, -180, -90, 180])
-    GRID = [5, 5]             # [Lat_Step, Lon_Step]
+    AREA = [54, 73, 3, 135]               # 全球模式示例 (或 [90, -180, -90, 180]) [54, 73, 3, 135]
+    GRID = [1, 1]                         # [Lat_Step, Lon_Step] [1,1] [5,5]
 
     # --- 计算 NUM_GRIDS ---
     lat_step, lon_step = GRID
@@ -291,12 +291,6 @@ if __name__ == "__main__":
 
     TIME_STEPS = 24
 
-    FINAL_FEATURES = [
-        'u10', 'v10', 'ws', 't2m', 'd2m', 'rh', 'sp', 'msl',
-        'i10fg', 'cape', 'tp', 'ssrd', 'lcc', 'tcc',
-        'blh', 'tcwv', 'skt', 'z', 'lsm'
-    ]
-
     RAW_COLUMNS = [
         'DDATETIME', 'LON_CENTER', 'LAT_CENTER',
         # --- 风场基础 (Wind Basis) ---
@@ -314,7 +308,7 @@ if __name__ == "__main__":
         'lcc',              # 低云量：关联“回南天”和大雾，填补能见度的关键特征
         'tcc',              # 总云量：影响辐射降温和白天的升温幅度 (0-1)
         # --- 边界层与水汽 (Boundary Layer & Vapor) ---
-        'blh',              # 边界层高度：决定污染物垂直扩散，关联能见度 (后续转 km)
+        'blh',              # 边界层高度：决定污染物垂直扩散，关联能见度
         'tcwv',             # 整层水汽 (kg/m2 或 mm)：数值范围约 1-70。若全部凝结对应的水深。暴雨发生的绝对水汽条件。
         # --- 地表热力与辐射 (Surface Thermal & Radiation) ---
         'skt',              # 肤温 (Skin Temp)：对辐射响应快，用于监测城市热岛效应 (后续转 °C)
@@ -322,7 +316,7 @@ if __name__ == "__main__":
         # --- 降水 (Precipitation) ---
         'tp',               # 总降水量：直接对应 AWS 雨量计 (m -> mm -> Log)
         # --- 静态地理信息 (Geo-Static) ---
-        'z',                # 位势：地势高度 (z/9.8)，用于气温/气压的垂直递减率订正 (后续转 km)
+        'z',                # 位势：地势高度 (z/9.8)，用于气温/气压的垂直递减率订正
         'lsm'               # 海陆掩码：区分深圳滨海特征 (陆地/海洋热力差异)
     ]
         
@@ -369,4 +363,4 @@ if __name__ == "__main__":
         time_steps_per_day=TIME_STEPS
     )
 
-    converter.process_all_files(max_workers=10)
+    converter.process_all_files(max_workers=32)

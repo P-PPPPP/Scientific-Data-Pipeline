@@ -6,15 +6,17 @@ from utils.functions import get_downloaded_pages, find_missing_pages
 
 if __name__ == "__main__":
     # 下载参数
-    directory = "/media/hdd/ppeng/storage/sz_weather/data_raw/"
+    directory = "~/storage/sz_weather/data_raw/"
     log_directory = "./logs/redownload_log.log"
     max_workers = 1 # 并发任务数
     max_retries = 3 # 单次请求最大重试次数
     timeout = 240 # 请求超时时间
 
     # 请求参数
-    app_key = "a8f005dbd19f4989b6d435af2d93abd8"
-    # app_key = "7483f80bbe1449e2bfd0687de6d4b0dc"
+    app_key = "" # 请替换为实际的 appKey
+    if not app_key:
+        raise ValueError("请在代码中设置 app_key 变量的值！")
+
     headers = {
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         "Accept": "application/json, text/javascript, */*; q=0.01",

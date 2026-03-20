@@ -1,11 +1,12 @@
-import numpy as np
-import pandas as pd
-from pathlib import Path
+import os
 import json
 import time
-from concurrent.futures import ProcessPoolExecutor, as_completed
+import numpy as np
+import pandas as pd
 from tqdm import tqdm
-import os
+from pathlib import Path
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
 
 class CSVToBinConverter:
     def __init__(self, 
@@ -113,17 +114,17 @@ class CSVToBinConverter:
         # 如果追求极致速度，可尝试 engine='pyarrow'
         df = pd.read_csv(csv_file)
         
-        # 1. 过滤列
+        # 过滤列
         existing_cols = [c for c in self.keep_columns if c in df.columns]
         df = df[existing_cols]
         
-        # 2. 特征工程
+        # 特征工程
         df = self.calculate_derived_features(df)
         
-        # 3. 单位与Log
+        # 单位与Log
         df = self.process_units_and_log(df)
         
-        # 4. 对齐网格
+        # 对齐网格
         grid_data = df.copy()
         expected_len = self.time_steps_per_day * self.num_grids
         
@@ -141,7 +142,7 @@ class CSVToBinConverter:
         grid_data = grid_data.merge(unique_grids_coords, on=['LON_CENTER', 'LAT_CENTER'], how='left')
         grid_data = grid_data.sort_values(['DDATETIME', 'GRIDID'])
         
-        # 5. 提取特征 (确保顺序与 final_features 一致)
+        # 提取特征
         for col in self.final_features:
             if col not in grid_data.columns:
                 # 如果某个配置的特征计算失败或缺失，填0兜底
@@ -183,7 +184,7 @@ class CSVToBinConverter:
         if max_workers is None:
             max_workers = max(1, os.cpu_count() - 2)
 
-        print(f"🚀 Starting processing {len(csv_files)} files with {max_workers} workers...")
+        print(f"Starting processing {len(csv_files)} files with {max_workers} workers...")
         print(f"   Input: {self.data_dir}")
         print(f"   Output: {self.target_dir}")
         print(f"   Grid Size: {self.num_grids}, Features: {len(self.final_features)}")
@@ -209,13 +210,13 @@ class CSVToBinConverter:
 
         if first_grid_coords is not None:
             self.save_global_metadata(sorted_global_times, first_grid_coords)
-            print(f"\n✅ Done! Total time: {time.time() - start_time:.2f}s")
+            print(f"\nDone! Total time: {time.time() - start_time:.2f}s")
         else:
-            print("\n❌ Failed to process any files successfully.")
+            print("\nFailed to process any files successfully.")
     
     def save_global_metadata(self, global_time_strs, grid_coords):
         """保存全局元数据"""
-        print("💾 Saving global metadata...")
+        print("Saving global metadata...")
         global_metadata = {
             'num_features': len(self.final_features),
             'num_grids': self.num_grids,
@@ -246,32 +247,35 @@ class CSVToBinConverter:
 # ================= 配置与执行区域 =================
 if __name__ == "__main__":
     
-    # 1. 路径设置
-    INPUT_DIR = '/mnt/drive1/pengpeng/storage/era5/csv_data_global'
-    OUTPUT_DIR = '/mnt/drive1/pengpeng/storage/era5/bin_data_global'
-    
-    # 2. 区域与分辨率配置
-    AREA = None               # 全球模式示例 (或 [90, -180, -90, 180]) [54, 73, 3, 135]
-    GRID = [5, 5]                         # [Lat_Step, Lon_Step] [1,1] [5,5]
+    # 配置
+    INPUT_DIR = '~/storage/era5/era5_daily_data_global'
+    OUTPUT_DIR = '~/storage/era5/bin_data_global'
+    AREA = None
+    GRID = [5, 5]
+
+    # INPUT_DIR = '~/storage/era5/era5_daily_data_cn'
+    # OUTPUT_DIR = '~/storage/era5/bin_data_cn'
+    # AREA = [54, 73, 3, 135]
+    # GRID = [1, 1]
 
     # --- 计算 NUM_GRIDS ---
     lat_step, lon_step = GRID
 
     if AREA is None:
-        # === 模式 A: 默认全球 (CDS API 默认行为) ===
+        # 全球
         num_lat = int(round(180 / lat_step)) + 1
-        num_lon = int(round(360 / lon_step)) # 经度: 全球 360 度 -> 不需要 +1 (0 和 360 重叠，只取其一)
-        print(f"🌍 Mode: Global (Default)")
+        num_lon = int(round(360 / lon_step))
+        print(f"Mode: Global (Default)")
     else:
-        # === 模式 B: 指定区域 ===
+        # 指定区域
         north, west, south, east = AREA
-        num_lat = int(round((north - south) / lat_step)) + 1 # 1. 计算纬度 (始终是线性的，需要 +1)
-        # 2. 计算经度 (需判断是否横跨整个地球)
+        num_lat = int(round((north - south) / lat_step)) + 1
+        # 计算经度 (需判断是否横跨整个地球)
         if east < west:
             lon_span = (east + 360) - west
         else:
             lon_span = east - west
-        # 关键判断：如果跨度非常接近 360 度，视为全球模式，不 +1
+        # 如果跨度非常接近 360 度，视为全球模式，不 +1
         if abs(lon_span - 360) < 1e-6:
             num_lon = int(round(lon_span / lon_step))
             print(f"🌍 Mode: Explicit Global (360° detected)")
@@ -283,7 +287,7 @@ if __name__ == "__main__":
     # 总网格数
     NUM_GRIDS = num_lat * num_lon
     
-    print(f"📊 Grid Calculation Info:")
+    print(f"Grid Calculation Info:")
     print(f"   Latitude Points : {num_lat}")
     print(f"   Longitude Points: {num_lon}")
     print(f"   Total Grids     : {num_lat} * {num_lon} = {NUM_GRIDS}")
@@ -320,7 +324,7 @@ if __name__ == "__main__":
         'lsm'               # 海陆掩码：区分深圳滨海特征 (陆地/海洋热力差异)
     ]
         
-    # 2. 最终输出到 .bin 文件的特征列表
+    # 最终输出到 .bin 文件的特征列表
     # 模型输入通道顺序 (Channel Order)
     FINAL_FEATURES = [
         # Group 1: 风 (Wind)

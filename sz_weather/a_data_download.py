@@ -4,16 +4,18 @@ from utils.downloader import sz_gov_downloader
 
 if __name__ == "__main__":
     # 下载参数
-    start_page, end_page = 150001, 200000 #　total_rows = 1203130430
-    directory = "/media/hdd/ppeng/storage/sz_weather/data_raw/"
+    start_page, end_page = 0, 200000 #　total_rows = 1203130430
+    directory = "~/storage/sz_weather/data_raw/"
     log_directory = f"./logs/download_log_{start_page}to{end_page}.log"
     max_workers = 1 # 并发任务数
     max_retries = 3 # 单次请求最大重试次数
     pages_list = list(range(start_page, end_page + 1))
 
     # 请求参数
-    app_key = "a8f005dbd19f4989b6d435af2d93abd8"
-    # app_key = "7483f80bbe1449e2bfd0687de6d4b0dc"
+    app_key = "" # 请替换为实际的 appKey
+    if not app_key:
+        raise ValueError("请在代码中设置 app_key 变量的值！")
+
     headers = {
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         "Accept": "application/json, text/javascript, */*; q=0.01",

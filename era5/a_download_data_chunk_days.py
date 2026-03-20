@@ -9,6 +9,7 @@ import shutil
 from collections import defaultdict
 import traceback
 
+
 class ERA5Downloader:
     def __init__(self, output_dir, variables, area_grid, chunk_days=5, area=None):
         """
@@ -30,7 +31,7 @@ class ERA5Downloader:
         # 确保输出目录存在
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
-            print(f"📁 创建输出目录: {self.output_dir}")
+            print(f"创建输出目录: {self.output_dir}")
 
     def _get_csv_path(self, date_obj):
         """生成最终 CSV 文件路径"""
@@ -73,21 +74,21 @@ class ERA5Downloader:
 
     def _clean_dataframe(self, df):
         """数据清洗逻辑：重命名、删除多余列、处理 expver"""
-        # 1. 统一时间列名
+        # 统一时间列名
         if 'valid_time' in df.columns:
             df.rename(columns={'valid_time': 'DDATETIME'}, inplace=True)
         elif 'time' in df.columns:
             df.rename(columns={'time': 'DDATETIME'}, inplace=True)
         else:
-            raise KeyError("❌ 数据中找不到时间列 (time 或 valid_time)")
+            raise KeyError("数据中找不到时间列 (time 或 valid_time)")
 
-        # 2. 统一经纬度列名
+        # 统一经纬度列名
         if 'longitude' in df.columns:
             df.rename(columns={'longitude': 'LON_CENTER'}, inplace=True)
         if 'latitude' in df.columns:
             df.rename(columns={'latitude': 'LAT_CENTER'}, inplace=True)
 
-        # 3. 筛选保留列
+        # 筛选保留列
         cols_to_keep = ['DDATETIME', 'LON_CENTER', 'LAT_CENTER'] 
         drop_list = ['number', 'step', 'surface', 'heightAboveGround', 'entireAtmosphere', 'expver']
         
@@ -97,11 +98,10 @@ class ERA5Downloader:
         
         df = df[cols_to_keep]
 
-        # 4. 去重 (处理 ERA5 的 expver 混合数据问题)
-        # groupby first 会取非空的第一条，通常能合并 expver=1 和 expver=5
+        # 去重 (处理 ERA5 的 expver 混合数据问题)
         df = df.groupby(['DDATETIME', 'LON_CENTER', 'LAT_CENTER'], as_index=False).first()
         
-        # 5. 确保时间类型
+        # 确保时间类型
         df['DDATETIME'] = pd.to_datetime(df['DDATETIME'])
         
         return df
@@ -123,29 +123,29 @@ class ERA5Downloader:
 
     def process_chunk(self, start_date, end_date):
         """核心处理逻辑：处理一个时间块 (下载 -> 清洗 -> 保存)"""
-        # 1. 检查缺失日期
+        # 检查缺失日期
         missing_dates = self._check_missing_dates(start_date, end_date)
         if not missing_dates:
-            print(f"⏭️  {start_date} 至 {end_date} 全部存在，跳过。")
+            print(f"{start_date} 至 {end_date} 全部存在，跳过。")
             return
 
-        print(f"🔄 处理时间段: {start_date} 至 {end_date} (需下载 {len(missing_dates)} 天)...")
+        print(f"处理时间段: {start_date} 至 {end_date} (需下载 {len(missing_dates)} 天)...")
 
-        # 2. 准备临时文件夹
+        # 准备临时文件夹
         chunk_id = start_date.strftime("%Y%m%d")
         extract_folder = f"temp_extract_chunk_{chunk_id}"
         if not os.path.exists(extract_folder):
             os.makedirs(extract_folder)
 
-        # 3. 构建请求映射 (Year, Month) -> [Days]
+        # 构建请求映射 (Year, Month) -> [Days]
         requests_map = defaultdict(list)
         for d in missing_dates:
             requests_map[(d.year, d.month)].append(d.strftime("%d"))
 
         try:
-            # 4. 循环下载
+            # 循环下载
             for (year, month), days in requests_map.items():
-                print(f"   ⬇️  正在请求 CDS: {year}-{month:02d}, 天数: {len(days)} 天")
+                print(f"正在请求 CDS: {year}-{month:02d}, 天数: {len(days)} 天")
                 zip_filename = f"temp_download_{chunk_id}_{year}{month:02d}.zip"
                 
                 self._download_cds_chunk(year, month, days, zip_filename)
@@ -161,28 +161,28 @@ class ERA5Downloader:
                 if os.path.exists(zip_filename):
                     os.remove(zip_filename)
 
-            # 5. 合并 NC 文件
+            # 合并 NC 文件
             nc_files = glob.glob(os.path.join(extract_folder, "*.nc"))
             if not nc_files:
                 raise FileNotFoundError("下载成功但未在解压目录找到 .nc 文件")
 
-            print(f"   ⚙️  正在解析 {len(nc_files)} 个 NC 文件...")
+            print(f"正在解析 {len(nc_files)} 个 NC 文件...")
             
             # 使用 xarray 读取
             with xr.open_mfdataset(nc_files, engine="netcdf4", combine='by_coords', compat='override') as ds:
                 df_temp = ds.to_dataframe().reset_index()
 
-            # 6. 清洗数据
+            # 清洗数据
             df_cleaned = self._clean_dataframe(df_temp)
 
-            # 7. 保存结果
-            print(f"   💾 正在拆分并保存 CSV...")
+            # 保存结果
+            print(f"正在拆分并保存 CSV...")
             self._save_daily_csv(df_cleaned)
             
-            print(f"   ✅ 时间段 {start_date} 至 {end_date} 完成。")
+            print(f"时间段 {start_date} 至 {end_date} 完成。")
 
         except Exception as e:
-            print(f"   ❌ 出错: {e}")
+            print(f"出错: {e}")
             traceback.print_exc()
         finally:
             # 清理临时目录
@@ -202,7 +202,7 @@ class ERA5Downloader:
 
         while current_date <= end_date:
             if current_date > today:
-                print(f"⚠️  日期 {current_date} 在未来，停止处理。")
+                print(f"日期 {current_date} 在未来，停止处理。")
                 break
             
             # 计算当前 Chunk 结束时间
@@ -218,7 +218,7 @@ class ERA5Downloader:
             
             current_date = chunk_end + datetime.timedelta(days=1)
         
-        print(f"\n🎉 全部任务完成！数据保存在: {self.output_dir}")
+        print(f"\n全部任务完成！数据保存在: {self.output_dir}")
 
 
 # ================= 配置与执行区域 =================
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     # 打印进程 ID 方便监控
     print(f"当前进程 ID: {os.getpid()}")
 
-    # 1. 定义变量列表
+    # 定义变量列表
     ERA5_VARIABLES = [
         "10m_u_component_of_wind", "10m_v_component_of_wind", "2m_dewpoint_temperature",
         "2m_temperature", "mean_sea_level_pressure", "surface_pressure",
@@ -236,16 +236,25 @@ if __name__ == "__main__":
         "total_column_water_vapour", "skin_temperature"
     ]
 
-    # 2. 实例化下载器类 (在这里修改主要参数)
+    # 实例化下载器
+    # Global
     downloader = ERA5Downloader(
-        output_dir="/mnt/drive1/pengpeng/storage/era5/era5_daily_data_global_2",  # 保存路径
+        output_dir="~/storage/era5/era5_daily_data_global",  # 保存路径
         variables=ERA5_VARIABLES,               # 变量列表
         area_grid=[5, 5],                       # 分辨率
-        # area=[54, 73, 3, 135],
         chunk_days=15                            # 每次请求天数
     )
 
-    # 3. 运行下载任务 (在这里修改时间范围)
+    # CN
+    # downloader = ERA5Downloader(
+    #     output_dir="~/storage/era5/era5_daily_data_cn",  # 保存路径
+    #     variables=ERA5_VARIABLES,               # 变量列表
+    #     area_grid=[1, 1],                       # 分辨率
+    #     area=[54, 73, 3, 135],
+    #     chunk_days=15                            # 每次请求天数
+    # )
+
+    # 运行下载任务 (在这里修改时间范围)
     downloader.run(
         start_date_str="2015-01-01",
         end_date_str="2019-12-30"

@@ -1,10 +1,11 @@
-import numpy as np
-import pandas as pd
-from pathlib import Path
 import json
 import time
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from tqdm import tqdm  # 如果没有安装，请 pip install tqdm
+
 
 class CSVToBinConverter:
     def __init__(self, data_dir, target_dir):
@@ -12,7 +13,7 @@ class CSVToBinConverter:
         self.target_dir = Path(target_dir)
         self.target_dir.mkdir(parents=True, exist_ok=True)
         
-        # 1. 原始列 (CSV中读取)
+        # 原始列
         self.keep_columns = [
             'DDATETIME',
             'GRIDID',
@@ -28,7 +29,7 @@ class CSVToBinConverter:
             'AIR_DENSITY' # 空气密度
         ]
 
-        # 2. 最终输出特征顺序
+        # 最终输出特征顺序
         self.weather_columns = [
             'T', 'MAXTOFDAY', 'SLP', 'AIR_DENSITY',
             'RHSFC',
@@ -38,7 +39,7 @@ class CSVToBinConverter:
             'RAIN01H', 'RAIN02H', 'RAIN03H', 'RAIN06H', 'RAIN24H'
         ]
         
-        # 3. 需要 Log1p 变换的列
+        # 需要 Log1p 变换的列
         self.log_transform_columns = [
             'V', 'RAIN01H', 'RAIN02H', 'RAIN03H', 'RAIN06H', 'RAIN24H'
         ]
@@ -74,9 +75,6 @@ class CSVToBinConverter:
         """
         try:
             bin_file = self.target_dir / f"{csv_file.stem}.bin"
-            
-            # 如果文件已存在且不需要覆盖，可以在这里加判断跳过
-            
             time_strs, grid_coords = self.process_single_file(csv_file, bin_file)
             return {
                 "status": "success",
@@ -94,7 +92,6 @@ class CSVToBinConverter:
 
     def process_single_file(self, csv_file, bin_file):
         """处理单个CSV文件的核心逻辑"""
-        # 优化提示: 如果安装了 pyarrow，使用 engine='pyarrow' 会快得多
         # df = pd.read_csv(csv_file, engine='pyarrow') 
         df = pd.read_csv(csv_file)
         
@@ -155,7 +152,6 @@ class CSVToBinConverter:
         first_grid_coords = None
         
         # 如果不指定 workers，默认为 CPU 核心数
-        # 对于 IO 混合型任务，有时设置为 CPU 核心数的 1.5 倍效果更好，但也取决于内存
         if max_workers is None:
             import os
             # 这里的逻辑是保留一点资源给系统，避免死机
@@ -224,8 +220,8 @@ class CSVToBinConverter:
 
 if __name__ == "__main__":
     # 路径配置
-    data_dir = '/mnt/drive1/pengpeng/storage/sz_weather/csv_data'
-    test_dir = '/mnt/drive1/pengpeng/storage/sz_weather/bin_data'
+    data_dir = '~/storage/sz_weather/csv_data'
+    test_dir = '~/storage/sz_weather/bin_data'
     
     # 可以在这里手动指定进程数，例如 max_workers=8
     converter = CSVToBinConverter(data_dir, test_dir)

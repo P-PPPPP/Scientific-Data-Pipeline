@@ -57,17 +57,17 @@ class CSVToBinConverter:
             if col in df.columns:
                 df[col] = df[col] - 273.15
 
-        # 气压: Pa -> kPa
+        # 气压: Pa -> bar
         for col in ['sp', 'msl']:
             if col in df.columns:
                 df[col] = df[col] / 1000.0
 
         # 高度: m / m2s2 -> km
         if 'z' in df.columns:
-            df['z'] = df['z'] / 9806.65 # Geopotential -> Height (m)
+            df['z'] = df['z'] / 9806.65 # Geopotential -> Height (km)
         
         if 'blh' in df.columns:
-            df['blh'] = df['blh'] / 1000.0 # m -> km
+            df['blh'] = df['blh'] # m -> km
 
         # 百分比截断
         for col in ['lcc', 'tcc']:
@@ -247,12 +247,12 @@ class CSVToBinConverter:
 if __name__ == "__main__":
     
     # 1. 路径设置
-    INPUT_DIR = '/mnt/drive1/pengpeng/storage/era5/csv_data_cn'
-    OUTPUT_DIR = '/mnt/drive1/pengpeng/storage/era5/bin_data_cn'
+    INPUT_DIR = '/mnt/drive1/pengpeng/storage/era5/csv_data_global'
+    OUTPUT_DIR = '/mnt/drive1/pengpeng/storage/era5/bin_data_global'
     
     # 2. 区域与分辨率配置
-    AREA = [54, 73, 3, 135]               # 全球模式示例 (或 [90, -180, -90, 180]) [54, 73, 3, 135]
-    GRID = [1, 1]                         # [Lat_Step, Lon_Step] [1,1] [5,5]
+    AREA = None               # 全球模式示例 (或 [90, -180, -90, 180]) [54, 73, 3, 135]
+    GRID = [5, 5]                         # [Lat_Step, Lon_Step] [1,1] [5,5]
 
     # --- 计算 NUM_GRIDS ---
     lat_step, lon_step = GRID
@@ -363,4 +363,4 @@ if __name__ == "__main__":
         time_steps_per_day=TIME_STEPS
     )
 
-    converter.process_all_files(max_workers=32)
+    converter.process_all_files(max_workers=1)

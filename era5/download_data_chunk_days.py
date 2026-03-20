@@ -238,15 +238,15 @@ if __name__ == "__main__":
 
     # 2. 实例化下载器类 (在这里修改主要参数)
     downloader = ERA5Downloader(
-        output_dir="/mnt/drive1/pengpeng/storage/era5/era5_daily_data_global_5*5",  # 保存路径
+        output_dir="/mnt/drive1/pengpeng/storage/era5/era5_daily_data_global_2",  # 保存路径
         variables=ERA5_VARIABLES,               # 变量列表
         area_grid=[5, 5],                       # 分辨率
         # area=[54, 73, 3, 135],
-        chunk_days=5                            # 每次请求天数
+        chunk_days=15                            # 每次请求天数
     )
 
     # 3. 运行下载任务 (在这里修改时间范围)
     downloader.run(
-        start_date_str="2020-01-01",
-        end_date_str="2025-12-10"
+        start_date_str="2015-01-01",
+        end_date_str="2019-12-30"
     )

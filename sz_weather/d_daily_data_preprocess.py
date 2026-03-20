@@ -1,10 +1,10 @@
 from utils.data_processor import data_completeness_processor
 
 if __name__ == "__main__":
-    raw_data_directory = "~/storage/sz_weather/daily_data_raw/"
-    save_directory = '~/storage/sz_weather/filled_data/'
-    grid_info_path = "~/storage/sz_weather/grid_info.csv"
-    stats_info_path = "~/storage/sz_weather/completeness_stats.csv"
+    raw_data_directory = "./storage/sz_weather/daily_data_raw/"
+    save_directory = './storage/sz_weather/filled_data/'
+    grid_info_path = "./storage/sz_weather/grid_info.csv"
+    stats_info_path = "./storage/sz_weather/completeness_stats.csv"
 
     # 其余变量的插值
     interpolate_configs = {

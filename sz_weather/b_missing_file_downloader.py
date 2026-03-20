@@ -6,7 +6,7 @@ from utils.functions import get_downloaded_pages, find_missing_pages
 
 if __name__ == "__main__":
     # 下载参数
-    directory = "~/storage/sz_weather/data_raw/"
+    directory = "./storage/sz_weather/data_raw/"
     log_directory = "./logs/redownload_log.log"
     max_workers = 1 # 并发任务数
     max_retries = 3 # 单次请求最大重试次数

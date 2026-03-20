@@ -5,7 +5,7 @@ from utils.downloader import sz_gov_downloader
 if __name__ == "__main__":
     # 下载参数
     start_page, end_page = 0, 200000 #　total_rows = 1203130430
-    directory = "~/storage/sz_weather/data_raw/"
+    directory = "./storage/sz_weather/data_raw/"
     log_directory = f"./logs/download_log_{start_page}to{end_page}.log"
     max_workers = 1 # 并发任务数
     max_retries = 3 # 单次请求最大重试次数

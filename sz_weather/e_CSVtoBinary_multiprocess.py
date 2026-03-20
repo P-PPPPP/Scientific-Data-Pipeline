@@ -220,8 +220,8 @@ class CSVToBinConverter:
 
 if __name__ == "__main__":
     # 路径配置
-    data_dir = '~/storage/sz_weather/csv_data'
-    test_dir = '~/storage/sz_weather/bin_data'
+    data_dir = './storage/sz_weather/csv_data'
+    test_dir = './storage/sz_weather/bin_data'
     
     # 可以在这里手动指定进程数，例如 max_workers=8
     converter = CSVToBinConverter(data_dir, test_dir)

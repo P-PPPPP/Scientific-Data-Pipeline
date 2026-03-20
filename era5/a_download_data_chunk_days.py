@@ -239,7 +239,7 @@ if __name__ == "__main__":
     # 实例化下载器
     # Global
     downloader = ERA5Downloader(
-        output_dir="~/storage/era5/era5_daily_data_global",  # 保存路径
+        output_dir="./storage/era5/era5_daily_data_global",  # 保存路径
         variables=ERA5_VARIABLES,               # 变量列表
         area_grid=[5, 5],                       # 分辨率
         chunk_days=15                            # 每次请求天数
@@ -247,7 +247,7 @@ if __name__ == "__main__":
 
     # CN
     # downloader = ERA5Downloader(
-    #     output_dir="~/storage/era5/era5_daily_data_cn",  # 保存路径
+    #     output_dir="./storage/era5/era5_daily_data_cn",  # 保存路径
     #     variables=ERA5_VARIABLES,               # 变量列表
     #     area_grid=[1, 1],                       # 分辨率
     #     area=[54, 73, 3, 135],

@@ -248,13 +248,13 @@ class CSVToBinConverter:
 if __name__ == "__main__":
     
     # 配置
-    INPUT_DIR = '~/storage/era5/era5_daily_data_global'
-    OUTPUT_DIR = '~/storage/era5/bin_data_global'
+    INPUT_DIR = './storage/era5/era5_daily_data_global'
+    OUTPUT_DIR = './storage/era5/bin_data_global'
     AREA = None
     GRID = [5, 5]
 
-    # INPUT_DIR = '~/storage/era5/era5_daily_data_cn'
-    # OUTPUT_DIR = '~/storage/era5/bin_data_cn'
+    # INPUT_DIR = './storage/era5/era5_daily_data_cn'
+    # OUTPUT_DIR = './storage/era5/bin_data_cn'
     # AREA = [54, 73, 3, 135]
     # GRID = [1, 1]
 

@@ -1,3 +1,5 @@
 xarray
 cdsapi
 pandas
+tqdm
+numpy

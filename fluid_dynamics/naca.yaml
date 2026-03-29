@@ -1,0 +1,20 @@
+csv_columns: [
+    "cell_id", "cell_type", "cell_type_name", "nverts", 
+    "cx", "cy", "cz", "v0", "v1", "v2", "density", "mach_number", "pressure", "temperature", "velocity_0", "velocity_1", "velocity_2",
+    "grad_density_0", "grad_density_1", "grad_density_2", "grad_u_0", "grad_u_1", "grad_u_2", "grad_v_0", "grad_v_1", "grad_v_2",
+    "grad_pressure_0", "grad_pressure_1", "grad_pressure_2"
+]
+
+coords_features: [cx, cy]               # 坐标特征
+phys_features: ["density", "mach_number", "pressure", "temperature", "velocity_0", "velocity_1"] # 物理量特征
+grad_features: [
+    grad_density_0, grad_density_1,     # 密度梯度
+    grad_u_0, grad_u_1,                 # x 方向速度梯度
+    grad_v_0, grad_v_1,                 # y 方向速度梯度
+    grad_pressure_0, grad_pressure_1    # 压力梯度（重要）
+]
+
+coords_dim: 2           # 坐标维度
+phys_features_dim: 6    # 物理特征维度 (input_dim & output_dim)
+grad_features_dim: 8    # 梯度特征维度
+all_features_dim: 14    # 所有数据特征维度

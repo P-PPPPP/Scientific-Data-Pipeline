@@ -7,7 +7,7 @@ A full-lifecycle data pipeline designed for **Scientific Computing**, **Fluid Dy
 </p>
 
 > [!WARNING]
-> **Work in Progress**: This repository is under active development. Some scripts may contain bugs or unoptimized logic. Please use with caution and double-check results for critical research tasks.
+> Work in Progress: This repository is under active development. The code is primarily intended for academic research and has not undergone large-scale production testing. It may contain bugs or unoptimized logic—please use with caution and verify results for critical research tasks.
 
 -----
 
@@ -19,7 +19,7 @@ A full-lifecycle data pipeline designed for **Scientific Computing**, **Fluid Dy
 
 -----
 
-## 🌟 Mission Statement (Welcome)
+## 🌟 Welcome
 
 In research involving deep learning for scientific computing (e.g., fluid simulation, meteorological prediction), obtaining high-quality datasets is often the first and most significant hurdle.
 
@@ -67,23 +67,34 @@ While many public platforms exist, individual researchers often face:
 
 -----
 
+#### 4\. Transonic Wing Flow Multi-Fidelity Dataset
+
+- **Description**: This dataset originates from intermediate results of compressible fluid numerical simulations, modeling a wing's behavior in a transonic flow field. It includes five core physical quantities and their gradients: Density, Mach Number, Pressure, Temperature, and Velocity.
+- **Data Characteristics**: The dataset provides 8 CSV files representing numerical results across a spectrum from coarse to fine mesh densities. Note: Mesh node positions are not aligned across different resolutions, presenting a realistic challenge for multi-fidelity learning.
+- **Application Scenarios**: Originally developed for high-fidelity data reconstruction and super-resolution simulation using neural networks. It is also highly suitable for research into spatial interpolation of fluid properties.
+- **download**: 
+- **Process Code**: [Fluid Dynamics README.md](./fluid_dynamics/readme.md)
+- **Reference Dataset Class**: [Pending, link to directory]
+
+-----
+
 ### 🚦 Spatio-Temporal Forecasting Datasets
 
-#### 4\. METR-LA / PEMS-BAY
+#### 5\. METR-LA / PEMS-BAY
 
   - **Description**: Classic traffic speed datasets recorded by sensors in Los Angeles and the Bay Area. Widely used for validating graph dynamics models like DCRNN.
   - **download**: [Pending, link to download]
   - **Process Code**: [Pending, link to readme in preprocessing directory]
   - **Reference Dataset Class**: [Pending, link to directory]
 
-#### 5\. PEMS-04 / PEMS-08
+#### 6\. PEMS-04 / PEMS-08
 
   - **Description**: Traffic flow data from California highways (San Francisco and San Bernardino). Standard benchmarks for attention-based spatio-temporal graph networks (ASTGCN).
   - **download**: [Pending, link to download]
   - **Process Code**: [Pending, link to readme in preprocessing directory]
   - **Reference Dataset Class**: [Pending, link to directory]
 
-#### 6\. TaxiBJ
+#### 7\. TaxiBJ
 
   - **Description**: Taxicab trajectory data in Beijing. Includes grid-based inflow/outflow alongside meteorological and holiday metadata.
   - **download**: [Pending, link to download]
@@ -94,21 +105,21 @@ While many public platforms exist, individual researchers often face:
 
 ### 📈 Time-Series Forecasting Datasets
 
-#### 7\. ETT (Electricity Transformer Temperature)
+#### 8\. ETT (Electricity Transformer Temperature)
 
   - **Description**: Includes oil temperature and six power load features from electricity transformers. Available in 15-minute (ETTm) and 1-hour (ETTh) granularities.
   - **download**: [https://github.com/zhouhaoyi/ETDataset](https://github.com/zhouhaoyi/ETDataset)
   - **Process Code**: [Pending, link to readme in preprocessing directory]
   - **Reference Dataset Class**: [Pending, link to directory]
 
-#### 8\. Electricity / Traffic / Weather
+#### 9\. Electricity / Traffic / Weather
 
   - **Description**: Common datasets covering power consumption, road occupancy, and 21 meteorological indicators (temperature, humidity, etc.).
-  - **download**: [https://drive.google.com/file/d/1rHJYc8cgNFPPvWLRpwynGj2xohqcc2R7/view?usp=sharing](https://drive.google.com/file/d/1rHJYc8cgNFPPvWLRpwynGj2xohqcc2R7/view?usp=sharing)
+  - **download**: 
   - **Process Code**: [Pending, link to readme in preprocessing directory]
   - **Reference Dataset Class**: [Pending, link to directory]
 
-#### 9\. Exchange Rate / Illness (ILI)
+#### 10\. Exchange Rate / Illness (ILI)
 
   - **Description**: Tracks daily exchange rates of eight countries and weekly influenza-like illness ratios from the CDC.
   - **download**: [Pending, link to download]
@@ -124,7 +135,8 @@ Direct links to pre-processed data packages for quick experimentation:
 | Category | Download Link |
 | :--- | :--- |
 | **ERA5-Global Binary Package** | [Google Drive](https://drive.google.com/file/d/1_USk4qPbhMNM3sB9mzfKAL3H-Z568V8Q/view) |
-| **Common Time-Series Datasets** | [Google Drive](https://drive.google.com/file/d/1rHJYc8cgNFPPvWLRpwynGj2xohqcc2R7/view?usp=sharing) |
+|**Common Spatio-Temporal-Sequence Datasets**|[Google Drive](https://drive.google.com/file/d/1BKZ8Iqfo2x610sUxGEMCjpFYyn_UllTK/view?usp=sharing)|
+|**Common Time-Series Datasets**|[Google Drive](https://drive.google.com/file/d/1qo-EWkPz-13IjYly9J_4B9In-aXuB--y/view?usp=sharing)|
 
 -----
 

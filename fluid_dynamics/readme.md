@@ -1,1 +1,1 @@
-![图片](/benchmark_level_20.png "")
+![图片](benchmark_level_20.png)

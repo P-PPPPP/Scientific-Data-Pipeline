@@ -31,6 +31,7 @@
 
 **Scientific-Data-Pipeline** 的存在不仅是为了提供数据，更是为了公开**从数据下载、预处理到构建 Torch Dataset 的完整代码流**。我们追求的是研究的**透明度**与**可用性**，旨在为计算数学与深度学习的交叉领域提供可靠的基础支撑。
 
+> [!WARNING]
 > **注**：本项目并非为了“刷榜”而建。如果你需要标准的时间序列 Benchmark 评测，推荐前往 [Time-Series-Library](https://github.com/thuml/Time-Series-Library)。
 
 -----

@@ -31,6 +31,7 @@ While many public platforms exist, individual researchers often face:
 
 **Scientific-Data-Pipeline** provides more than just data; it discloses the **entire workflow**—from downloading and preprocessing to building Torch Datasets. Our goal is to ensure research is **reproducible, reliable, and accessible**, supporting the intersection of computational mathematics and deep learning.
 
+> [!WARNING]
 > **Note**: This repository is not intended for "leaderboard chasing." If you require standard time-series benchmark evaluations, we recommend [Time-Series-Library](https://github.com/thuml/Time-Series-Library).
 
 -----

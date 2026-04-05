@@ -1,145 +1,144 @@
 # Scientific-Data-Pipeline
 
-A full-lifecycle data pipeline designed for **Scientific Computing**, **Fluid Dynamics**, and **Spatio-Temporal Forecasting**.
+A full-process dataset repository designed for **scientific computing**, **fluid dynamics**, and **spatio-temporal sequence prediction**.
 
 <p align="center">
-  <b>English</b> | <a href="./readme_cn.md">中文说明</a>
+  <a href="./readme.md">中文说明</b> | <b>English</b>
 </p>
 
 > [!WARNING]
-> Work in Progress: This repository is under active development. The code is primarily intended for academic research and has not undergone large-scale production testing. It may contain bugs or unoptimized logic—please use with caution and verify results for critical research tasks.
+> Project Status: This repository is a Work in Progress. The code is primarily intended for academic research and has not been extensively tested in large-scale production environments. There may be bugs in computational logic or implementation. Please perform your own verification and validation when using for research purposes.
 
 -----
 
-## 📖 Navigation
+## <a id="Navigation">📖 Table of Contents</a>
 
-  - **[Dataset Introduction](https://www.google.com/search?q=%23datasets-included)**: Overview of backgrounds and application scenarios.
-  - **[Dataset Statistics](https://www.google.com/search?q=./data_stats.md)**: Detailed metrics including sample counts and feature dimensions.
-  - **[Data Download](https://www.google.com/search?q=%23data-download)**: Direct access to pre-processed binary data packages.
+  - **[Included Datasets Overview](#data-included)**: Quickly understand the background and applicable scenarios of each dataset.
+  - **[Dataset Package Downloads](#download-summary)**: Direct access to pre-processed binary data packages.
 
 -----
 
-## 🌟 Welcome
+## <a id="Welcome">🌟 Welcome</a>
 
-In research involving deep learning for scientific computing (e.g., fluid simulation, meteorological prediction), obtaining high-quality datasets is often the first and most significant hurdle.
+When conducting deep learning research in scientific computing (e.g., fluid simulation, weather prediction), obtaining high-quality datasets is often the first hurdle.
 
-While many public platforms exist, individual researchers often face:
+Although many public platforms exist, individual researchers frequently face the following pain points:
 
-1.  **High Acquisition Costs**: Downloading, cleaning, and aligning large-scale raw data is extremely time-consuming.
-2.  **Reproducibility Issues**: Private preprocessing logic in papers makes it difficult to benchmark experimental results.
-3.  **Toolchain Gaps**: The transition from raw tabular files to PyTorch `Dataset` classes is often tedious and repetitive.
+1.  **High Acquisition Cost**: Downloading, cleaning, and aligning large-scale raw data is extremely time-consuming.
+2.  **Difficulty in Reproduction**: Private preprocessing logic in papers makes it hard to benchmark experimental results.
+3. **Broken Toolchain**: The conversion process from raw tables to PyTorch `Dataset` is tedious and repetitive.
 
-**Scientific-Data-Pipeline** provides more than just data; it discloses the **entire workflow**—from downloading and preprocessing to building Torch Datasets. Our goal is to ensure research is **reproducible, reliable, and accessible**, supporting the intersection of computational mathematics and deep learning.
+**Scientific-Data-Pipeline** exists not only to provide data but also to open-source the **complete code flow from data download and preprocessing to Torch Dataset construction**. We pursue research **transparency** and **usability**, aiming to provide reliable foundational support for the intersection of computational mathematics and deep learning.
 
 > [!WARNING]
-> **Note**: This repository is not intended for "leaderboard chasing." If you require standard time-series benchmark evaluations, we recommend [Time-Series-Library](https://github.com/thuml/Time-Series-Library).
+> **Note**: This project is not built for "leaderboard chasing." If you need standard time-series benchmarking, we recommend [Time-Series-Library](https://github.com/thuml/Time-Series-Library).
 
 -----
 
-## 📂 Datasets Included
+## <a id="data-included">📂 Included Datasets</a>
 
-### 🌍 Meteorological & Multi-Scale Datasets
+### 🌍 Meteorological Reconstruction & Multi-scale Datasets
 
-#### 1\. Shenzhen Automatic Weather Station Data (City-Scale)
+#### 1. Shenzhen Automatic Weather Station Data (Urban Scale)
+  - **Description**: High-density regional monitoring data from Shenzhen's automatic weather stations. The extremely dense node distribution makes it ideal for high-fidelity spatial interpolation tasks and constructing complex graph neural network (e.g., GAT, GCN) adjacency matrices.
+  - **Source**: [Shenzhen Government Data Open Platform](https://opendata.sz.gov.cn/)
+  - **Processing & Loader**: [Preprocessing Scripts & Documentation](./sz_weather/readme.md)
 
-  - **Description**: High-density regional monitoring data from automatic weather stations in Shenzhen. Its dense node distribution is ideal for high-fidelity spatial interpolation and constructing adjacency matrices for graph-based models like GAT or GCN.
-  - **Source**: Shenzhen Government Open Data Platform.
-  - **Processing Note**: Raw data is tabular; it is recommended to convert these into `.npy` or `.bin` formats for efficient deep learning training.
-  - **download**: [Pending, link to download]
-  - **Process Code**: [Pending, link to readme in preprocessing directory]
-  - **Reference Dataset Class**: [Pending, link to directory]
+#### 2. ERA5-CN (National Scale)
+  - **Description**: China regional dataset extracted from global ERA5 reanalysis data. Moderate resolution, ideal for regional spatio-temporal prediction, data assimilation research, and large-scale model pre-training.
+  - **Source**: [Copernicus Climate Data Store (CDS)](https://cds.climate.copernicus.eu/)
+  - **Processing & Loader**: [Preprocessing Scripts & Documentation](./era5/readme.md)
 
-#### 2\. ERA5-CN (National-Scale)
-
-  - **Description**: Extracted from the global ERA5 reanalysis specifically for the China region. This provides a robust resolution suitable for regional spatio-temporal forecasting and data assimilation research.
-  - **Source**: Copernicus Climate Data Store (CDS).
-  - **download**: [Pending, link to download]
-  - **Process Code**: [Pending, link to readme in preprocessing directory]
-  - **Reference Dataset Class**: [Pending, link to directory]
-
-#### 3\. ERA5-Global (Planetary-Scale)
-
-  - **Description**: A global snapshot covering the entire Earth manifold. Essential for training large-scale weather prediction models or generating boundary conditions for numerical PDE solvers.
-  - **Source**: Copernicus Climate Data Store (CDS).
-  - **download**: [https://drive.google.com/file/d/1\_USk4qPbhMNM3sB9mzfKAL3H-Z568V8Q/view](https://drive.google.com/file/d/1_USk4qPbhMNM3sB9mzfKAL3H-Z568V8Q/view)
-  - **Process Code**: [Pending, link to readme in preprocessing directory]
-  - **Reference Dataset Class**: [Pending, link to directory]
+#### 3. ERA5-Global (Global Scale)
+  - **Description**: Planetary-scale dataset covering the entire globe. Essential for training global weather prediction foundation models or generating initial/boundary conditions for numerical partial differential equation (PDE) solvers.
+  - **Source**: [Copernicus Climate Data Store (CDS)](https://cds.climate.copernicus.eu/)
+  - **Offline Package**: [Google Drive](https://drive.google.com/file/d/1_USk4qPbhMNM3sB9mzfKAL3H-Z568V8Q/view)
+  - **Processing & Loader**: [Preprocessing Scripts & Documentation](./era5/readme.md)
 
 -----
 
-#### 4\. Transonic Wing Flow Multi-Fidelity Dataset
+### 🌊 Scientific Computing & Fluid Dynamics Datasets
 
-- **Description**: This dataset originates from intermediate results of compressible fluid numerical simulations, modeling a wing's behavior in a transonic flow field. It includes five core physical quantities and their gradients: Density, Mach Number, Pressure, Temperature, and Velocity.
-- **Data Characteristics**: The dataset provides 8 CSV files representing numerical results across a spectrum from coarse to fine mesh densities. Note: Mesh node positions are not aligned across different resolutions, presenting a realistic challenge for multi-fidelity learning.
-- **Application Scenarios**: Originally developed for high-fidelity data reconstruction and super-resolution simulation using neural networks. It is also highly suitable for research into spatial interpolation of fluid properties.
-- **download**: 
-- **Process Code**: [Fluid Dynamics README.md](./fluid_dynamics/readme.md)
-- **Reference Dataset Class**: [Pending, link to directory]
+#### 4. Transonic Wing Flow Multi-Fidelity Dataset
+- **Description**: This dataset originates from intermediate results of compressible fluid numerical computations, simulating the physical behavior of a wing in transonic flow fields. Data includes 5 core physical quantities: Density, Mach Number, Pressure, Temperature, Velocity, along with their gradients.
+- **Characteristics**: Provides 8 CSV files of varying fidelity levels, covering numerical results from coarse to fine grids. Note that grid positions across different scales are not forcibly aligned, presenting realistic challenges for multi-fidelity learning.
+- **Application**: Originally developed for neural network-based high-fidelity data reconstruction and super-resolution simulation, also suitable for spatial interpolation studies of fluid properties.
+- **Detailed Config**: [View YAML definition](./fluid_dynamics/naca.yaml)
+- **Processing & Loader**: [Fluid Data Preprocessing Documentation](./fluid_dynamics/readme.md)
 
 -----
 
 ### 🚦 Spatio-Temporal Forecasting Datasets
 
-#### 5\. METR-LA / PEMS-BAY
+#### 5. METR-LA / PEMS-BAY
+  - **Description**: Classic traffic speed datasets for Los Angeles and the Bay Area. Commonly used for validating graph dynamics models like Diffusion Convolutional Recurrent Neural Networks (DCRNN).
+  - **Reference**: Li et al., "Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting" (ICLR 2018).
+  - **Reference Implementation**: [liyaguang/dcrnn](https://github.com/liyaguang/dcrnn)
+  - **Offline Package**: [Google Drive - Common ST-Sequence](https://drive.google.com/file/d/1BKZ8Iqfo2x610sUxGEMCjpFYyn_UllTK/view?usp=sharing)
+  - **Processing & Loader**: [Data Preprocessing & Dataset Construction](./time_series/readme.md)
 
-  - **Description**: Classic traffic speed datasets recorded by sensors in Los Angeles and the Bay Area. Widely used for validating graph dynamics models like DCRNN.
-  - **download**: [Pending, link to download]
-  - **Process Code**: [Pending, link to readme in preprocessing directory]
-  - **Reference Dataset Class**: [Pending, link to directory]
+#### 6. PEMS-04 / PEMS-08
+  - **Description**: California highway traffic flow datasets. Widely used as benchmarks for attention-based spatio-temporal graph convolutional networks (ASTGCN).
+  - **Reference**: Guo et al., "Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting" (AAAI 2019).
+  - **Reference Implementation**: [Davidham3/ASTGCN-2019-mxnet](https://github.com/Davidham3/ASTGCN-2019-mxnet)
+  - **Offline Package**: [Google Drive - Common ST-Sequence](https://drive.google.com/file/d/1BKZ8Iqfo2x610sUxGEMCjpFYyn_UllTK/view?usp=sharing)
+  - **Processing & Loader**: [Data Preprocessing & Dataset Construction](./time_series/readme.md)
 
-#### 6\. PEMS-04 / PEMS-08
-
-  - **Description**: Traffic flow data from California highways (San Francisco and San Bernardino). Standard benchmarks for attention-based spatio-temporal graph networks (ASTGCN).
-  - **download**: [Pending, link to download]
-  - **Process Code**: [Pending, link to readme in preprocessing directory]
-  - **Reference Dataset Class**: [Pending, link to directory]
-
-#### 7\. TaxiBJ
-
-  - **Description**: Taxicab trajectory data in Beijing. Includes grid-based inflow/outflow alongside meteorological and holiday metadata.
-  - **download**: [Pending, link to download]
-  - **Process Code**: [Pending, link to readme in preprocessing directory]
-  - **Reference Dataset Class**: [Pending, link to directory]
+#### 7. TaxiBJ
+  - **Description**: Beijing taxi trajectory dataset containing grid-based flow data along with accompanying weather and holiday information, suitable for spatio-temporal prediction tasks with multi-source feature fusion.
+  - **Reference**: Zhang et al., "Deep Spatio-Temporal Residual Networks for Citywide Crowd Flow Prediction" (AAAI 2017).
+  - **Offline Package**: [Google Drive - Common ST-Sequence](https://drive.google.com/file/d/1BKZ8Iqfo2x610sUxGEMCjpFYyn_UllTK/view?usp=sharing)
+  - **Processing & Loader**: [Data Preprocessing & Dataset Construction](./time_series/readme.md)
 
 -----
 
 ### 📈 Time-Series Forecasting Datasets
 
-#### 8\. ETT (Electricity Transformer Temperature)
+#### 8. ETT (Electricity Transformer Temperature)
+  - **Description**: Contains transformer oil temperature and 6 power load features. Available in 15-minute (ETTm) and 1-hour (ETTh) granularities; a benchmark dataset for Long Sequence Time-Series Forecasting (LSTF).
+  - **Reference**: Zhou et al., "Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting" (AAAI 2021 Best Paper).
+  - **Source Code**: [zhouhaoyi/ETDataset](https://github.com/zhouhaoyi/ETDataset)
+  - **Offline Package**: [Common Time-Series Package](https://drive.google.com/file/d/1qo-EWkPz-13IjYly9J_4B9In-aXuB--y/view?usp=sharing)
+  - **Processing & Loader**: [Data Preprocessing & Dataset Construction](./time_series/readme.md)
 
-  - **Description**: Includes oil temperature and six power load features from electricity transformers. Available in 15-minute (ETTm) and 1-hour (ETTh) granularities.
-  - **download**: [https://github.com/zhouhaoyi/ETDataset](https://github.com/zhouhaoyi/ETDataset)
-  - **Process Code**: [Pending, link to readme in preprocessing directory]
-  - **Reference Dataset Class**: [Pending, link to directory]
+#### 9. Electricity / Traffic
+  - **Description**: General time-series datasets covering electricity consumption (kWh) and road occupancy (Occupancy) metrics, commonly used for multivariate long-range forecasting tasks.
+  - **Reference**: Lai et al., "Modeling Long- and Short-Term Temporal Patterns with Deep Neural Networks" (SIGIR 2018).
+  - **Source Code**: [laiguokun/LSTNet](https://github.com/laiguokun/LSTNet)
+  - **Offline Package**: [Common Time-Series Package](https://drive.google.com/file/d/1qo-EWkPz-13IjYly9J_4B9In-aXuB--y/view?usp=sharing)
+  - **Processing & Loader**: [Data Preprocessing & Dataset Construction](./time_series/readme.md)
 
-#### 9\. Electricity / Traffic / Weather
+#### 10. Weather
+  - **Description**: General time-series dataset containing 21 meteorological indicators including temperature, humidity, and air pressure, sourced from the MPI-BGC weather station.
+  - **Official Source**: [Max Planck Institute for Biogeochemistry](https://www.bgc-jena.mpg.de/wetter/)
+  - **Offline Package**: [Common Time-Series Package](https://drive.google.com/file/d/1qo-EWkPz-13IjYly9J_4B9In-aXuB--y/view?usp=sharing)
+  - **Processing & Loader**: [Data Preprocessing & Dataset Construction](./time_series/readme.md)
 
-  - **Description**: Common datasets covering power consumption, road occupancy, and 21 meteorological indicators (temperature, humidity, etc.).
-  - **download**: 
-  - **Process Code**: [Pending, link to readme in preprocessing directory]
-  - **Reference Dataset Class**: [Pending, link to directory]
+#### 11. Exchange Rate
+  - **Description**: Daily exchange rate monitoring data for 8 countries (Australia, UK, Canada, etc.) from 1990 to 2016.
+  - **Reference**: Lai et al., "Modeling Long- and Short-Term Temporal Patterns with Deep Neural Networks" (SIGIR 2018).
+  - **Source Code**: [laiguokun/LSTNet](https://github.com/laiguokun/LSTNet)
+  - **Offline Package**: [Common Time-Series Package](https://drive.google.com/file/d/1qo-EWkPz-13IjYly9J_4B9In-aXuB--y/view?usp=sharing)
+  - **Processing & Loader**: [Data Preprocessing & Dataset Construction](./time_series/readme.md)
 
-#### 10\. Exchange Rate / Illness (ILI)
-
-  - **Description**: Tracks daily exchange rates of eight countries and weekly influenza-like illness ratios from the CDC.
-  - **download**: [Pending, link to download]
-  - **Process Code**: [Pending, link to readme in preprocessing directory]
-  - **Reference Dataset Class**: [Pending, link to directory]
+#### 12. Illness (ILI)
+  - **Description**: Weekly influenza-like illness (ILI) surveillance data from the US CDC, containing the proportion of ILI patients among outpatient visits. A classic task for evaluating long-range modeling capabilities of epidemic forecasting models.
+  - **Official Source**: [CDC FluView Portal](https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html)
+  - **Offline Package**: [Common Time-Series Package](https://drive.google.com/file/d/1qo-EWkPz-13IjYly9J_4B9In-aXuB--y/view?usp=sharing)
+  - **Processing & Loader**: [Data Preprocessing & Dataset Construction](./time_series/readme.md)
 
 -----
 
-## ⬇️ Data Download Summary
+## <a id="download-summary"></a> ⬇️ One-Click Dataset Download Summary
 
-Direct links to pre-processed data packages for quick experimentation:
-
-| Category | Download Link |
+| Dataset Category | Quick Download Link (G-Drive) |
 | :--- | :--- |
-| **ERA5-Global Binary Package** | [Google Drive](https://drive.google.com/file/d/1_USk4qPbhMNM3sB9mzfKAL3H-Z568V8Q/view) |
-|**Common Spatio-Temporal-Sequence Datasets**|[Google Drive](https://drive.google.com/file/d/1BKZ8Iqfo2x610sUxGEMCjpFYyn_UllTK/view?usp=sharing)|
-|**Common Time-Series Datasets**|[Google Drive](https://drive.google.com/file/d/1qo-EWkPz-13IjYly9J_4B9In-aXuB--y/view?usp=sharing)|
+| **ERA5-Global Preprocessed Binary Package** | [Download](https://drive.google.com/file/d/1_USk4qPbhMNM3sB9mzfKAL3H-Z568V8Q/view) |
+| **General Spatio-Temporal Sequence Datasets (ST-Sequence)** | [Download](https://drive.google.com/file/d/1BKZ8Iqfo2x610sUxGEMCjpFYyn_UllTK/view?usp=sharing) |
+| **General Time-Series Benchmarks** | [Download](https://drive.google.com/file/d/1qo-EWkPz-13IjYly9J_4B9In-aXuB--y/view?usp=sharing) |
 
 -----
 
-## 🤝 Contribution
+## 🤝 Contributions & Feedback
 
-If you encounter bugs or wish to contribute new datasets/preprocessing scripts, please feel free to open an **Issue** or submit a **Pull Request**.
+If you encounter bugs while using the code, or wish to contribute new datasets, please feel free to submit an **Issue** or **Pull Request**.

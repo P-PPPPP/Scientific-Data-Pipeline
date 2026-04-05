@@ -25,13 +25,12 @@
 
 ```text
 .
-├── data_process/           # 数据获取与转换
-│   ├── a_download_data_chunk_days.py    # 基于天数块的下载器
-│   └── b_CSVtoBinary_multiprocess.py     # 多进程二进制转换工具
-├── pytorch_dataset/        # 深度学习适配器
+├── data_process/                           # 数据获取与转换
+│   ├── a_download_data_chunk_days.py       # 基于天数块的下载器
+│   └── b_CSVtoBinary_multiprocess.py       # 多进程二进制转换工具
+├── pytorch_dataset/                        # 深度学习适配器
 │   └── binary_filelist_dataset-4-spatial_interpolation.py  # 空间插值数据集加载器
-├── metadata/               # 自动生成：元数据、时间索引与坐标
-└── README.md               # 本文档
+└── README.md                               # 本文档
 ```
 
 ---

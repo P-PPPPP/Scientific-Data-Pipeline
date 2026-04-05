@@ -1,9 +1,9 @@
-# Scientific-Data-Pipeline
+  # Scientific-Data-Pipeline
 
 A full-process dataset repository designed for **scientific computing**, **fluid dynamics**, and **spatio-temporal sequence prediction**.
 
 <p align="center">
-  <a href="./readme.md">中文说明</b> | <b>English</b>
+  <b>English</b> | <a href="./readme_cn.md">中文说明</a>
 </p>
 
 > [!WARNING]

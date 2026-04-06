@@ -3,3 +3,4 @@ cdsapi
 pandas
 tqdm
 numpy
+netcdf4

@@ -1,96 +1,168 @@
-# 🌍 ERA5 逐小时单层数据处理模块 (ERA5-Single-Levels)
+# 🌍 ERA5 Hourly Single-Level Data Processing Module
 
-本目录提供了针对 ERA5 全球大气再分析数据的全流程处理方案。
+<p align="center">
+  <b>English</b> | <a href="./readme_cn.md">中文说明</a>
+</p>
 
-## 📜 官方简介 (Official Introduction)
-
-> **ERA5** 是欧洲中期天气预报中心（ECMWF）发布的第五代全球气候与天气再分析数据集。它利用**数据同化（Data Assimilation）**技术，将物理模型与来自全球的观测数据相结合，生成了一套完整且一致的全球大气状态估计。
->
-> 相比前代，ERA5 提供了更高的时间分辨率（逐小时）和空间分辨率，涵盖了过去 80 年（1940年至今）的多种大气、陆地和海洋变量。对于气候研究、数值天气预报（NWP）以及物理神经网络的训练具有核心价值。
+> This directory provides a complete processing pipeline for ERA5 global atmospheric reanalysis data. It is designed as a submodule for climate, weather, or physics-informed neural network (PINN) projects in the main repository.
 
 ---
 
-## 📊 数据概览 (Data Specification)
+## 📜 Official Introduction
 
-* **来源**：[Copernicus Climate Data Store (CDS)](https://cds.climate.copernicus.eu/)
-* **核心变量**：支持包含温度、气压、风场在内的 **19 类** 关键气象变量。
-* **时间精度**：1 小时 (Hourly)。
-* **存储格式**：
-    * **原始阶段**：按天存储的 `.csv` 文件。
-    * **深度学习阶段**：高性能二进制 `.bin` 文件，并伴随 `.json` 元数据。
+**ERA5** is the fifth generation of global climate and weather reanalysis datasets released by the European Centre for Medium-Range Weather Forecasts (ECMWF). Using **data assimilation** techniques, it combines physical models with observational data from around the world to produce a complete and consistent estimate of the global atmospheric state.
+
+Compared to its predecessors, ERA5 offers higher temporal (hourly) and spatial resolution, covering a wide range of atmospheric, land, and ocean variables from **1940 to the present**. It is of core value for climate research, numerical weather prediction (NWP), and physics-informed neural network training.
 
 ---
 
-## 📂 目录结构 (Directory Structure)
+## 📊 Data Specification
+
+- **Source**: [Copernicus Climate Data Store (CDS)](https://cds.climate.copernicus.eu/)
+- **Core Variables**: Supports **19 key meteorological variables** (temperature, pressure, wind, etc.)
+- **Temporal Resolution**: Hourly
+- **Storage Format**:
+  - Raw data: Daily `.csv` files
+  - Training-ready: High-performance binary `.bin` files + `.json` metadata
+
+---
+
+## 📂 Directory Structure (within this module)
 
 ```text
 .
-├── data_process/                           # 数据获取与转换
-│   ├── a_download_data_chunk_days.py       # 基于天数块的下载器
-│   └── b_CSVtoBinary_multiprocess.py       # 多进程二进制转换工具
-├── pytorch_dataset/                        # 深度学习适配器
-│   └── binary_filelist_dataset-4-spatial_interpolation.py  # 空间插值数据集加载器
-└── README.md                               # 本文档
+├── data_process/
+│   ├── a_download_data_chunk_days.py       # Chunk-based downloader
+│   ├── b_CSVtoBinary_multiprocess.py       # Multi-process preprocessing + binary conversion
+│   └── c_get_elevation.py                  # Retrieve grid point elevation
+├── pytorch_dataset/
+│   └── binary_filelist_dataset-4-spatial_interpolation.py  # Spatial interpolation dataset loader
+└── README.md                               # This document
 ```
 
 ---
 
-## 🛠 处理流程 (Workflow)
+## 🔐 API License & Configuration
 
-### 1. 数据下载 (Download)
-使用 `a_download_data_chunk_days.py`。该脚本支持：
-* 指定连续时间段、地理范围及分辨率。
-* **断点续传**：自动识别已下载天数，规避重复任务。
+1. Register and obtain access to [ERA5 hourly data on single levels](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=download).
+2. Follow the [CDS API setup guide](https://cds.climate.copernicus.eu/how-to-api) to configure `~/.cdsapirc`.
+3. Install `cdsapi`:
 
-### 2. 预处理与二进制转换 (Preprocessing)
-运行 `b_CSVtoBinary_multiprocess.py`。
-* 该程序会将原始 CSV 转换为适合高效读取的二进制文件。
-* 自动导出：`metadata.json` (统计信息), `date_data.json` (日期) 和 `coords_data.npy` (经纬度坐标)。
-
-### 3. 高性能加载 (Loading)
-使用内置 `torch Dataset`，利用 **内存映射 (Memory Mapping)** 技术。这对于你正在开发的 **GSF-GAT** 等模型至关重要，因为它能在处理超大规模气象序列时保持极低的 IO 开销。
-
----
-
-## 🖼 可视化与图结构 Demo (Visualization & Graph Tools)
-
-### 📈 数据可视化预览
-
-*（此处可放置处理后的 2D 场热力图，用于校验空间分布是否正确）*
-
-### 🕸 邻接矩阵生成 (Adjacency Matrix)
-
-*（占位符：针对图神经网络 GSF-GAT 设计，展示基于经纬度或物理相关性构建的节点连接关系）*
-
-### 🎭 掩码生成 (Mask Generation)
-
-*（占位符：用于空间插值或缺失值重构任务的任务掩码示意图）*
-
----
-
-## 🚀 快速上手 (Quick Start)
-
-### 1. 环境准备
 ```bash
-pip install cdsapi pandas numpy torch
-# 请确保 ~/.cdsapirc 已正确配置 API Key
+pip install cdsapi
 ```
 
-### 2. 代码示例
-你可以通过以下方式直接调用处理好的二进制数据：
+### Example request code
 
 ```python
-from pytorch_dataset.binary_filelist_dataset import SpatialInterpolationDataset
+import cdsapi
 
-# 初始化数据集（支持内存映射）
-dataset = SpatialInterpolationDataset(bin_dir='./data/bin/', metadata_path='./data/metadata.json')
-print(f"Total samples: {len(dataset)}")
+client = cdsapi.Client()
+dataset = 'reanalysis-era5-single-levels'
+request = {
+    'product_type': ['reanalysis'],
+    'variable': ['2m_temperature'],
+    'year': ['2024'],
+    'month': ['03'],
+    'day': ['01'],
+    'time': ['13:00'],
+    'data_format': 'grib',
+}
+client.retrieve(dataset, request, 'download.grib')
 ```
 
 ---
 
-## 🤝 后续工作框架 (To-Do List)
+## 🌟 Recommended Variables (17 in total)
 
-* [ ] 补充 `requirements.txt`。
-* [ ] 完善 19 个变量的具体预处理逻辑文档。
-* [ ] 集成基于图结构的邻接矩阵生成脚本，支持自定义距离阈值。
+```python
+ERA5_VARIABLES = [
+    "10m_u_component_of_wind", "10m_v_component_of_wind", "2m_dewpoint_temperature",
+    "2m_temperature", "mean_sea_level_pressure", "surface_pressure",
+    "total_precipitation", "instantaneous_10m_wind_gust", "surface_solar_radiation_downwards",
+    "low_cloud_cover", "total_cloud_cover", "boundary_layer_height",
+    "convective_available_potential_energy", "geopotential", "land_sea_mask",
+    "total_column_water_vapour", "skin_temperature"
+]
+```
+
+### Categorized Description
+
+#### Category 1: Direct Mapping Variables
+| Variable | Corresponding Observation | Purpose |
+|----------|---------------------------|---------|
+| `2m_temperature` | Air temperature | Directly corresponds to AWS observations |
+| `2m_dewpoint_temperature` | Relative humidity (to be calculated) | Compute RH and air density with `t2m` |
+| `surface_pressure` | Pressure | Requires vertical correction |
+| `10m_u/v_component_of_wind` | Wind speed/direction | Compute full wind speed and direction |
+| `instantaneous_10m_wind_gust` | Maximum wind gust | Fill extreme wind events (typhoons, convection) |
+| `total_precipitation` | Accumulated rainfall | Hourly precipitation (m → mm) |
+| `mean_sea_level_pressure` | Pressure (validation) | Eliminate altitude interference |
+
+#### Category 2: Physical Drivers & Auxiliary Inference
+| Variable | Target Association | Purpose |
+|----------|--------------------|---------|
+| `surface_solar_radiation_downwards` | Air temperature, surface temperature | Direct driver of temperature rise |
+| `total_cloud_cover` | Visibility, diurnal temperature range | Affects radiative cooling and warming |
+| `low_cloud_cover` | Visibility (fog) | Fill missing visibility data |
+| `boundary_layer_height` | Visibility, air quality | Affects pollutant dispersion |
+| `skin_temperature` | Urban heat island | More sensitive to radiation than 2m temperature |
+| `convective_available_potential_energy` | Heavy precipitation, thunderstorm winds | Discriminate convective potential |
+| `total_column_water_vapour` | Precipitation, humidity | Total atmospheric water vapor content |
+
+#### Category 3: Geo-static Variables
+| Variable | Purpose |
+|----------|---------|
+| `geopotential` | Compute terrain height (`Height = z / 9.8`) for lapse rate correction |
+| `land_sea_mask` | Distinguish land/sea/coastline, explain thermal differences |
+
+---
+
+## 🛠️ Complete Processing Workflow (executed within this submodule)
+
+### 1️⃣ Data Download
+Use `a_download_data_chunk_days.py`  
+- Supports resuming interrupted downloads  
+- Configure time range, area, and resolution directly in the script
+
+```bash
+# Execute from the module root directory
+nohup python -u ./data_process/a_download_data_chunk_days.py > ./download_task.log &
+```
+
+### 2️⃣ Preprocessing + Binary Conversion
+Use `b_CSVtoBinary_multiprocess.py`  
+- Automatically generates: `metadata.json`, `date_data.json`, `coords_data.npy`, and `.bin` files
+
+```bash
+nohup python -u ./data_process/b_CSVtoBinary_multiprocess.py > ./preprocess_task.log &
+```
+
+### 3️⃣ Retrieve Grid Elevation (optional)
+```bash
+python ./data_process/c_get_elevation.py
+```
+
+### 4️⃣ PyTorch Dataset Loading
+Use `pytorch_dataset/binary_filelist_dataset-4-spatial_interpolation.py`  
+- Based on memory mapping  
+- Supports spatial interpolation, suitable for very large sequences
+
+---
+
+## 🚀 Quick Start (using this module independently)
+
+```bash
+# 1. Enter the submodule directory
+cd your_main_repo/era5
+
+# 2. Install dependencies
+pip install -r requirements.txt   # if available; otherwise at least: numpy, xarray, cdsapi, torch
+
+# 3. Configure CDS API
+# Ensure ~/.cdsapirc contains:
+# url: https://cds.climate.copernicus.eu/api
+# key: <UID>:<API-Key>
+
+# 4. Download → Preprocess → Train
+```

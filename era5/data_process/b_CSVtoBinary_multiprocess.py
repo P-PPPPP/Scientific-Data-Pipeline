@@ -18,13 +18,13 @@ class CSVToBinConverter:
                  num_grids,
                  time_steps_per_day=24):
         """
-        初始化转换器，参数由外部传入
+        Initialize the converter with external parameters
         """
         self.data_dir = Path(data_dir)
         self.target_dir = Path(target_dir)
         self.target_dir.mkdir(parents=True, exist_ok=True)
         
-        # 参数配置
+        # Parameter configuration
         self.keep_columns = keep_columns
         self.final_features = final_features
         self.log_transform_columns = log_transform_columns
@@ -32,58 +32,58 @@ class CSVToBinConverter:
         self.time_steps_per_day = time_steps_per_day
         
     def calculate_derived_features(self, df):
-        """计算物理衍生变量：RH 和 WS"""
-        # --- RH 计算 ---
+        """Calculate derived physical variables: RH and WS"""
+        # --- RH Calculation ---
         if 't2m' in df.columns and 'd2m' in df.columns:
             t_c = df['t2m'] - 273.15
             td_c = df['d2m'] - 273.15
             
-            # Magnus 公式
+            # Magnus formula
             es = 6.112 * np.exp((17.67 * t_c) / (t_c + 243.5))
             e = 6.112 * np.exp((17.67 * td_c) / (td_c + 243.5))
             
             df['rh'] = (e / es).clip(0, 1) * 100
 
-        # --- WS 计算 ---
+        # --- WS Calculation ---
         if 'u10' in df.columns and 'v10' in df.columns:
             df['ws'] = np.sqrt(df['u10']**2 + df['v10']**2)
         
         return df
 
     def process_units_and_log(self, df):
-        """物理单位修正 和 Log1p 变换"""
+        """Physical unit conversion and Log1p transformation"""
         
-        # 温度: K -> C
+        # Temperature: K -> C
         for col in ['t2m', 'd2m', 'skt']:
             if col in df.columns:
                 df[col] = df[col] - 273.15
 
-        # 气压: Pa -> bar
+        # Pressure: Pa -> bar
         for col in ['sp', 'msl']:
             if col in df.columns:
                 df[col] = df[col] / 1000.0
 
-        # 高度: m / m2s2 -> km
+        # Height: m / m2s2 -> km
         if 'z' in df.columns:
-            df['z'] = df['z'] / 9806.65 # Geopotential -> Height (km)
+            df['z'] = df['z'] / 9806.65  # Geopotential -> Height (km)
         
         if 'blh' in df.columns:
-            df['blh'] = df['blh'] # m -> km
+            df['blh'] = df['blh']  # m -> km
 
-        # 百分比截断
+        # Percentage clipping
         for col in ['lcc', 'tcc']:
             if col in df.columns:
                 df[col] = df[col].clip(0, 1)
 
-        # 降水: m -> mm
+        # Precipitation: m -> mm
         if 'tp' in df.columns:
             df['tp'] = (df['tp'] * 1000).clip(lower=0)
 
-        # 辐射: J/m2 -> W/m2
+        # Radiation: J/m2 -> W/m2
         if 'ssrd' in df.columns:
              df['ssrd'] = (df['ssrd'] / 3600.0).clip(lower=0)
 
-        # Log1p 变换 (基于配置列表)
+        # Log1p transformation (based on configuration list)
         for col in self.log_transform_columns:
             if col in df.columns:
                 df[col] = np.log1p(df[col])
@@ -91,7 +91,7 @@ class CSVToBinConverter:
         return df
 
     def _process_wrapper(self, csv_file):
-        """多进程包装器"""
+        """Multiprocessing wrapper"""
         try:
             bin_file = self.target_dir / f"{csv_file.stem}.bin"
             time_strs, grid_coords = self.process_single_file(csv_file, bin_file)
@@ -110,21 +110,21 @@ class CSVToBinConverter:
             }
 
     def process_single_file(self, csv_file, bin_file):
-        """核心处理逻辑"""
-        # 如果追求极致速度，可尝试 engine='pyarrow'
+        """Core processing logic"""
+        # For maximum speed, try engine='pyarrow'
         df = pd.read_csv(csv_file)
         
-        # 过滤列
+        # Filter columns
         existing_cols = [c for c in self.keep_columns if c in df.columns]
         df = df[existing_cols]
         
-        # 特征工程
+        # Feature engineering
         df = self.calculate_derived_features(df)
         
-        # 单位与Log
+        # Unit conversion and log transformation
         df = self.process_units_and_log(df)
         
-        # 对齐网格
+        # Align grid
         grid_data = df.copy()
         expected_len = self.time_steps_per_day * self.num_grids
         
@@ -134,7 +134,7 @@ class CSVToBinConverter:
              else:
                  raise ValueError(f"Length mismatch: {len(grid_data)} < {expected_len}")
         
-        # 动态生成 GRIDID
+        # Dynamically generate GRIDID
         unique_grids_coords = grid_data[['LON_CENTER', 'LAT_CENTER']].drop_duplicates()
         unique_grids_coords = unique_grids_coords.sort_values(by=['LAT_CENTER', 'LON_CENTER']).reset_index(drop=True)
         unique_grids_coords['GRIDID'] = unique_grids_coords.index
@@ -142,13 +142,13 @@ class CSVToBinConverter:
         grid_data = grid_data.merge(unique_grids_coords, on=['LON_CENTER', 'LAT_CENTER'], how='left')
         grid_data = grid_data.sort_values(['DDATETIME', 'GRIDID'])
         
-        # 提取特征
+        # Extract features
         for col in self.final_features:
             if col not in grid_data.columns:
-                # 如果某个配置的特征计算失败或缺失，填0兜底
+                # Fill with zeros if a configured feature fails or is missing
                 grid_data[col] = 0.0
                 
-        # 提取并转为 float32
+        # Extract and convert to float32
         weather_features = grid_data[self.final_features].values.astype(np.float32)
         
         # Reshape: [Time, Grid, Feature]
@@ -156,22 +156,22 @@ class CSVToBinConverter:
             self.time_steps_per_day, self.num_grids, len(self.final_features)
         )
         
-        # 提取坐标 (只取第一个时间步)
+        # Extract coordinates (only take the first time step)
         coords = grid_data[['LON_CENTER', 'LAT_CENTER']].values
         grid_coords = coords[:self.num_grids].astype(np.float32)
         
-        # 提取时间
+        # Extract time
         unique_times = grid_data['DDATETIME'].unique()
         time_strs = unique_times.tolist()
         
-        # 写入 Bin
+        # Write to binary file
         with open(bin_file, 'wb') as f:            
             data_3d.tofile(f)
         
         return time_strs, grid_coords
 
     def process_all_files(self, max_workers=None):
-        """多进程入口"""
+        """Multiprocessing entry point"""
         csv_files = sorted(list(self.data_dir.glob("*.csv")))
         
         if not csv_files:
@@ -204,7 +204,7 @@ class CSVToBinConverter:
                 else:
                     print(f"\n[Error] File {result['file']} failed: {result['error_msg']}")
 
-        # 整理元数据
+        # Organize metadata
         sorted_keys = sorted(global_time_strs.keys())
         sorted_global_times = {k: global_time_strs[k] for k in sorted_keys}
 
@@ -215,7 +215,7 @@ class CSVToBinConverter:
             print("\nFailed to process any files successfully.")
     
     def save_global_metadata(self, global_time_strs, grid_coords):
-        """保存全局元数据"""
+        """Save global metadata"""
         print("Saving global metadata...")
         global_metadata = {
             'num_features': len(self.final_features),
@@ -244,47 +244,49 @@ class CSVToBinConverter:
         np.save(self.target_dir / 'coords_data.npy', grid_coords)
 
 
-# ================= 配置与执行区域 =================
+# ================= Configuration and Execution Section =================
 if __name__ == "__main__":
     
-    # 配置
+    # Configuration
+    # For global processing.
     INPUT_DIR = './storage/era5/era5_daily_data_global'
     OUTPUT_DIR = './storage/era5/bin_data_global'
     AREA = None
     GRID = [5, 5]
 
+    # For regional processing.
     # INPUT_DIR = './storage/era5/era5_daily_data_cn'
     # OUTPUT_DIR = './storage/era5/bin_data_cn'
     # AREA = [54, 73, 3, 135]
     # GRID = [1, 1]
 
-    # --- 计算 NUM_GRIDS ---
+    # --- Calculate NUM_GRIDS ---
     lat_step, lon_step = GRID
 
     if AREA is None:
-        # 全球
+        # Global
         num_lat = int(round(180 / lat_step)) + 1
         num_lon = int(round(360 / lon_step))
         print(f"Mode: Global (Default)")
     else:
-        # 指定区域
+        # Regional
         north, west, south, east = AREA
         num_lat = int(round((north - south) / lat_step)) + 1
-        # 计算经度 (需判断是否横跨整个地球)
+        # Calculate longitude (need to handle wrap-around cases)
         if east < west:
             lon_span = (east + 360) - west
         else:
             lon_span = east - west
-        # 如果跨度非常接近 360 度，视为全球模式，不 +1
+        # If the span is very close to 360 degrees, treat as global mode, no +1
         if abs(lon_span - 360) < 1e-6:
             num_lon = int(round(lon_span / lon_step))
             print(f"🌍 Mode: Explicit Global (360° detected)")
         else:
-            # 局部区域，首尾不相连 -> 需要 +1
+            # Local region, start and end not connected -> need +1
             num_lon = int(round(lon_span / lon_step)) + 1
             print(f"🗺️  Mode: Regional Crop")
 
-    # 总网格数
+    # Total number of grids
     NUM_GRIDS = num_lat * num_lon
     
     print(f"Grid Calculation Info:")
@@ -297,62 +299,62 @@ if __name__ == "__main__":
 
     RAW_COLUMNS = [
         'DDATETIME', 'LON_CENTER', 'LAT_CENTER',
-        # --- 风场基础 (Wind Basis) ---
-        'u10', 'v10',       # 10m 纬向/经向风分量：用于合成全风速 (WS) 和确定风向
-        # --- 温湿基础 (Temp & Hum Basis) ---
-        'd2m',              # 2m 露点温度：计算相对湿度 (RH) 和空气密度的关键
-        't2m',              # 2m 气温：直接对应 AWS 观测，回归分析基础 (后续转 °C)
-        # --- 气压基础 (Pressure Basis) ---
-        'msl',              # 海平面气压：用于消除海拔差异的大尺度背景气压 (后续转 Bar)
-        'sp',               # 地表气压：基于网格平均海拔的气压，需配合 z 进行垂直订正 (后续转 Bar)
-        # --- 极端与对流 (Extremes & Convection) ---
-        'i10fg',            # 瞬时10m阵风：捕捉台风/强对流极值 (长尾分布 -> Log)
-        'cape',             # 对流有效位能：预测雷暴/大风潜势，物理合理性判据 (长尾分布 -> Log)
-        # --- 云与能见度 (Clouds & Visibility) ---
-        'lcc',              # 低云量：关联“回南天”和大雾，填补能见度的关键特征
-        'tcc',              # 总云量：影响辐射降温和白天的升温幅度 (0-1)
-        # --- 边界层与水汽 (Boundary Layer & Vapor) ---
-        'blh',              # 边界层高度：决定污染物垂直扩散，关联能见度
-        'tcwv',             # 整层水汽 (kg/m2 或 mm)：数值范围约 1-70。若全部凝结对应的水深。暴雨发生的绝对水汽条件。
-        # --- 地表热力与辐射 (Surface Thermal & Radiation) ---
-        'skt',              # 肤温 (Skin Temp)：对辐射响应快，用于监测城市热岛效应 (后续转 °C)
-        'ssrd',             # 地表短波辐射：气温上升的直接驱动力 (J/m2 -> W/m2 -> Log)
-        # --- 降水 (Precipitation) ---
-        'tp',               # 总降水量：直接对应 AWS 雨量计 (m -> mm -> Log)
-        # --- 静态地理信息 (Geo-Static) ---
-        'z',                # 位势：地势高度 (z/9.8)，用于气温/气压的垂直递减率订正
-        'lsm'               # 海陆掩码：区分深圳滨海特征 (陆地/海洋热力差异)
+        # --- Wind Basis ---
+        'u10', 'v10',       # 10m zonal/meridional wind components: used to synthesize wind speed (WS) and determine wind direction
+        # --- Temperature & Humidity Basis ---
+        'd2m',              # 2m dewpoint temperature: key for calculating relative humidity (RH) and air density
+        't2m',              # 2m temperature: directly corresponds to AWS observations, baseline for regression analysis (converted to °C)
+        # --- Pressure Basis ---
+        'msl',              # Mean sea level pressure: large-scale background pressure for eliminating altitude differences (converted to Bar)
+        'sp',               # Surface pressure: pressure based on grid mean altitude, requires vertical correction with z (converted to Bar)
+        # --- Extremes & Convection ---
+        'i10fg',            # Instantaneous 10m wind gust: captures typhoon/severe convection extremes (long-tail distribution -> Log)
+        'cape',             # Convective available potential energy: predicts thunderstorm/gale potential, physically-based criterion (long-tail distribution -> Log)
+        # --- Clouds & Visibility ---
+        'lcc',              # Low cloud cover: associated with high humidity and fog, key feature for visibility
+        'tcc',              # Total cloud cover: affects radiative cooling and daytime warming amplitude (0-1)
+        # --- Boundary Layer & Water Vapor ---
+        'blh',              # Boundary layer height: determines vertical diffusion of pollutants, related to visibility
+        'tcwv',             # Total column water vapor (kg/m2 or mm): typical range 1-70, represents water depth if fully condensed, absolute moisture condition for heavy rain
+        # --- Surface Thermal & Radiation ---
+        'skt',              # Skin temperature: responds quickly to radiation, used for monitoring urban heat island effect (converted to °C)
+        'ssrd',             # Surface solar radiation downwards: direct driver of temperature rise (J/m2 -> W/m2 -> Log)
+        # --- Precipitation ---
+        'tp',               # Total precipitation: directly corresponds to AWS rain gauge (m -> mm -> Log)
+        # --- Geo-Static Information ---
+        'z',                # Geopotential: terrain height (z/9.8), used for vertical lapse rate correction of temperature/pressure
+        'lsm'               # Land-sea mask: distinguishes coastal characteristics (land/ocean thermal differences)
     ]
         
-    # 最终输出到 .bin 文件的特征列表
-    # 模型输入通道顺序 (Channel Order)
+    # Final feature list to output to .bin file
+    # Model input channel order
     FINAL_FEATURES = [
-        # Group 1: 风 (Wind)
-        'u10', 'v10',       # 风矢量分量
-        'ws',               # [衍生] 合成风速 (Wind Speed)
-        # Group 2: 温湿 (Temperature & Humidity)
-        't2m',              # 气温 (Celsius)
-        'd2m',              # 露点 (Celsius)
-        'rh',               # [衍生] 相对湿度 (0-1, Magnus公式计算)
-        # Group 3: 气压 (Pressure)
-        'sp',               # 地表压 (Bar / 100kPa)
-        'msl',              # 海平压 (Bar / 100kPa)
-        # Group 4: 极值与潜势 (Extremes & Potential)
-        'i10fg',            # 阵风 (Log)
-        'cape',             # 对流潜势 (Log)
-        # Group 5: 水与光 (Water & Light - Drivers)
-        'tp',               # 降水 (mm + Log)
-        'ssrd',             # 辐射 (W/m2 + Log)
-        # Group 6: 云 (Clouds)
-        'lcc',              # 低云 (0-1)
-        'tcc',              # 总云 (0-1)
-        # Group 7: 环境状态 (Environmental State)
-        'blh',              # 边界层高度 (km) - 影响扩散
-        'tcwv',             # 整层水汽
-        'skt',              # 肤温 (Celsius)
-        # Group 8: 地理静态 (Static Geography)
-        'z',                # 地形高度 (km) - 垂直订正核心
-        'lsm'               # 海陆掩码
+        # Group 1: Wind
+        'u10', 'v10',       # Wind vector components
+        'ws',               # [Derived] Wind speed
+        # Group 2: Temperature & Humidity
+        't2m',              # Air temperature (Celsius)
+        'd2m',              # Dewpoint (Celsius)
+        'rh',               # [Derived] Relative humidity (0-1, calculated via Magnus formula)
+        # Group 3: Pressure
+        'sp',               # Surface pressure (Bar / 100kPa)
+        'msl',              # Mean sea level pressure (Bar / 100kPa)
+        # Group 4: Extremes & Potential
+        'i10fg',            # Wind gust (Log)
+        'cape',             # Convective potential (Log)
+        # Group 5: Water & Light (Drivers)
+        'tp',               # Precipitation (mm + Log)
+        'ssrd',             # Radiation (W/m2 + Log)
+        # Group 6: Clouds
+        'lcc',              # Low cloud (0-1)
+        'tcc',              # Total cloud (0-1)
+        # Group 7: Environmental State
+        'blh',              # Boundary layer height (km) - affects diffusion
+        'tcwv',             # Total column water vapor
+        'skt',              # Skin temperature (Celsius)
+        # Group 8: Static Geography
+        'z',                # Terrain height (km) - core for vertical correction
+        'lsm'               # Land-sea mask
     ]
 
     LOG_TRANSFORM_COLS = ['ssrd', 'tp', 'cape', 'i10fg']

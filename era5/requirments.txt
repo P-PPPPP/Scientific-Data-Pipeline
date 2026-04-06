@@ -4,3 +4,4 @@ pandas
 tqdm
 numpy
 netcdf4
+dask

@@ -157,7 +157,7 @@ Use `pytorch_dataset/binary_filelist_dataset-4-spatial_interpolation.py`
 cd your_main_repo/era5
 
 # 2. Install dependencies
-pip install -r requirements.txt   # if available; otherwise at least: numpy, xarray, cdsapi, torch
+pip install -r requirements.txt   # all packages are necessary.
 
 # 3. Configure CDS API
 # Ensure ~/.cdsapirc contains:

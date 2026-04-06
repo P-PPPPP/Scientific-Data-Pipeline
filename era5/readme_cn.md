@@ -157,7 +157,7 @@ python ./data_process/c_get_elevation.py
 cd your_main_repo/era5
 
 # 2. 安装依赖
-pip install -r requirements.txt   # 如果存在，否则至少需要：numpy, xarray, cdsapi, torch
+pip install -r requirements.txt   # all packages are necessary.
 
 # 3. 配置 CDS API
 # 确保 ~/.cdsapirc 包含：

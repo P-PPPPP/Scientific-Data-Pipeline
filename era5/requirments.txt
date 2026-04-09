@@ -5,3 +5,4 @@ tqdm
 numpy
 netcdf4
 dask
+certifi
